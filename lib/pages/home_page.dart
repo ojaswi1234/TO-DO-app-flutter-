@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:todo/data/database.dart';
+import 'package:todo/util/navigation_widget.dart';
 import 'package:todo/util/todo_tile.dart';
 import 'package:todo/util/dialog_box.dart';
 
@@ -14,12 +16,26 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
+  final _myBox = Hive.box('mybox');
   ToDoDataBase db = ToDoDataBase();
+
+  @override
+  void initState(){
+    // if this is the 1st time ever opening the app, then create default data
+    if(_myBox.get("TODOLIST") == null){
+      db.createInitialData();
+    }else{
+      //data already exist
+      db.loadData();
+    }
+    super.initState();
+  }
 
   void checkBoxChanged(bool? value, int index) {
     setState(() {
       db.toDoList[index][1] = !db.toDoList[index][1];
     });
+    db.updateDataBase();
   }
 
   void saveNewTask() {
@@ -28,6 +44,7 @@ class _HomePageState extends State<HomePage> {
       _controller.clear();
     });
     Navigator.of(context).pop();
+    db.updateDataBase();
   }
 
   void createNewTask() {
@@ -47,6 +64,42 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       db.toDoList.removeAt(index);
     });
+    db.updateDataBase();
+  }
+
+
+  void editTask(int index){
+    _controller.text = db.toDoList[index][0]; // Pre-fill the text field with the current task name
+    showDialog(
+      context: context,
+      builder: (context) {
+        return DialogBox(
+          controller: _controller,
+          onSave: () {
+            setState(() {
+              db.toDoList[index][0] = _controller.text; // Update the task name
+              _controller.clear();
+            });
+            Navigator.of(context).pop();
+            db.updateDataBase();
+          },
+          onCancel: () => Navigator.of(context).pop(),
+        );
+      },
+    );
+  }
+
+  void notificationTask(int index){
+    showDialog(
+      context: context,
+        builder: (context) {
+        return AlertDialog( // Added missing semicolon
+          title: const Text('Notification'),
+                backgroundColor: Colors.yellowAccent[100],
+                content: NavigationWidget(),
+        );
+      },
+    );
   }
 
   @override
@@ -67,27 +120,35 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: createNewTask,
         backgroundColor: Colors.indigoAccent[100],
-        child: Icon(Icons.add),
+        child: Icon(Icons.add, color: Colors.white),
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.white,  Colors.yellowAccent[100]!],
+            colors: [Colors.white, Colors.cyanAccent[100]! ,Colors.yellowAccent[100]!],
             begin: Alignment.bottomLeft,
             end: Alignment.topRight,
           ),
         ),
-        child: ListView.builder(
-          itemCount: db.toDoList.length,
-          itemBuilder: (context, index) {
-            return ToDoTile(
-              taskName: db.toDoList[index][0],
-              taskCompleted: db.toDoList[index][1],
-              onChanged: (value) => checkBoxChanged(value, index),
-              deleteFunction: (context) => deleteTask(index), // Fixed to pass index
-            );
-          },
-        ),
+        child: db.toDoList.isEmpty
+            ? const Center(
+                child: Text(
+                  "No Tasks Added Yet, Press + to add",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+                ),
+              )
+            : ListView.builder(
+                itemCount: db.toDoList.length,
+                itemBuilder: (context, index) {
+                  return ToDoTile(
+                    taskName: db.toDoList[index][0],
+                    taskCompleted: db.toDoList[index][1],
+                    onChanged: (value) => checkBoxChanged(value, index),
+                    deleteFunction: (context) => deleteTask(index),
+                    editFunction: (context) => editTask(index),
+                  );
+                },
+              ),
       ),
     );
   }

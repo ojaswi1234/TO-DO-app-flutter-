@@ -6,13 +6,15 @@ class ToDoTile extends StatelessWidget {
   final bool taskCompleted;
   final Function(bool?)? onChanged;
   final Function(BuildContext)? deleteFunction;
+  final Function(BuildContext)? editFunction;
+  final Function(BuildContext)? notificationFunction;
 
   const ToDoTile({
     super.key,
     required this.taskName,
     required this.taskCompleted,
     required this.onChanged,
-    required this.deleteFunction,
+    required this.deleteFunction, this.editFunction, this.notificationFunction,
   });
 
   @override
@@ -28,9 +30,24 @@ class ToDoTile extends StatelessWidget {
               icon: Icons.delete,
               backgroundColor: Colors.red.shade300,
               borderRadius: BorderRadius.circular(12), // Added borderRadius
+              autoClose: true,
             ),
           ],
         ),
+
+        startActionPane: ActionPane(
+          motion: StretchMotion(), // Corrected motion to StretchMotion
+          children: [
+            SlidableAction(
+              onPressed: editFunction,
+              icon: Icons.edit,
+              backgroundColor: Colors.green,
+              borderRadius: BorderRadius.circular(12), // Added borderRadius
+              autoClose: true,
+            ),
+          ],
+        ),
+
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -46,6 +63,29 @@ class ToDoTile extends StatelessWidget {
                 activeColor: Colors.black,
               ),
               Text(taskName, style: TextStyle(decoration: taskCompleted ? TextDecoration.lineThrough : TextDecoration.none, color: taskCompleted ? Colors.grey[600] : Colors.black, fontSize: 16, fontWeight: taskCompleted ? FontWeight.w400 : FontWeight.w500)),
+              const Spacer(),
+
+              MaterialButton(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(44),
+                ),
+                  padding: const EdgeInsets.all(12),
+                  minWidth: 50,
+                  height: 50,
+
+                  child: const Icon(
+                    Icons.notifications,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  onPressed: () => notificationFunction?.call(context),
+
+
+
+
+              ),
+
             ],
           ),
         ),
