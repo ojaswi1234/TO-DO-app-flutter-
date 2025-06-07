@@ -105,6 +105,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -116,6 +117,40 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         backgroundColor: Colors.indigoAccent,
+      ),
+      drawer: Drawer(
+
+        child: Column(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    colors: [Colors.indigoAccent, Colors.white],
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+
+                )
+
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Todo", style: TextStyle(fontSize: 40, fontFamily: "Bauhaus 93" ),),
+                ]
+              ),
+
+            ),
+            ListTile(
+              leading: Icon(Icons.timer),
+              title: Text("Pomodoro Timer"),
+              onTap: (){
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/timer');
+              },
+            ),
+          ]
+        )
+
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: createNewTask,
@@ -146,6 +181,7 @@ class _HomePageState extends State<HomePage> {
                     onChanged: (value) => checkBoxChanged(value, index),
                     deleteFunction: (context) => deleteTask(index),
                     editFunction: (context) => editTask(index),
+                    notificationFunction: (context) => notificationTask(index),
                   );
                 },
               ),
