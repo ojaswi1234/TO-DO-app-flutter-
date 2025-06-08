@@ -113,7 +113,12 @@ class _HomePageState extends State<HomePage> {
             Text(
               "TO DO",
               style: TextStyle(color: Colors.white, fontFamily: ""),
+              textAlign: TextAlign.center,
             ),
+            SizedBox(
+              width: 10,
+            ),
+            
           ],
         ),
         backgroundColor: Colors.indigoAccent,
